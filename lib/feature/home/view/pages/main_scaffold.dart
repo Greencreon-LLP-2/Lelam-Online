@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:lelamonline_flutter/core/router/route_names.dart';
 import 'package:lelamonline_flutter/core/theme/app_theme.dart';
 import 'package:lelamonline_flutter/feature/home/view/pages/home_page.dart';
 import 'package:lelamonline_flutter/feature/home/view/widgets/app_drawer.dart';
@@ -8,7 +10,10 @@ import 'package:lelamonline_flutter/feature/shortlist/views/short_list_page.dart
 import 'package:lelamonline_flutter/feature/status/view/pages/buying_status_page.dart';
 import 'package:lelamonline_flutter/feature/status/view/pages/selling_status_page.dart';
 import 'package:lelamonline_flutter/feature/status/view/pages/status_page.dart';
+import 'package:lelamonline_flutter/utils/custom_safe_area.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+
 
 class MainScaffold extends StatefulWidget {
   final String? userId;
@@ -25,6 +30,7 @@ class _MainScaffoldState extends State<MainScaffold> {
   bool isStatus = false;
   String? userId;
   Map<String, dynamic>? adData;
+  bool showLoginPrompt = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -51,7 +57,9 @@ class _MainScaffoldState extends State<MainScaffold> {
             : const Center(child: Text('Support')),
         isStatus
             ? SellingStatusPage(userId: userId, adData: adData)
-            : SellPage(userId: userId),
+            : showLoginPrompt
+                ? _buildLoginPrompt()
+                : SellPage(userId: userId),
         isStatus ? ShortListPage(userId: userId) : StatusPage(userId: userId),
         Center(
           child: Text(
@@ -61,99 +69,142 @@ class _MainScaffoldState extends State<MainScaffold> {
         ),
       ];
 
+  Widget _buildLoginPrompt() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.error_outline,
+            size: 64,
+            color: Colors.red,
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Please log in to sell items',
+            style: TextStyle(fontSize: 16, color: Colors.red),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              context.pushReplacementNamed(RouteNames.loginPage);
+              if (kDebugMode) {
+                print('Navigating to login page');
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryColor,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 12,
+              ),
+              textStyle: const TextStyle(fontSize: 16),
+            ),
+            child: const Text('Log In'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      drawer: AppDrawerWidget(userId: userId),
-      resizeToAvoidBottomInset: false,
-      body: SafeArea(
-        child: _pages[currentIndex], // Main page content inside SafeArea
-      ),
-      bottomNavigationBar: SafeArea(
-        bottom: true,
-        top: false,
-        left: false,
-        right: false,
-        child: SizedBox(
-          height: 37,
-          child: MediaQuery.removePadding(
-            context: context,
-            removeBottom: true,
-            child: BottomNavigationBar(
-              type: BottomNavigationBarType.fixed,
-              currentIndex: currentIndex,
-              onTap: (index) {
-                if (kDebugMode) print('Selected index: $index');
-                if (index == 4) {
-                  _scaffoldKey.currentState?.openDrawer();
-                  return;
-                }
-
-                setState(() {
-                  currentIndex = index;
-                  if (index == 0) {
-                    isStatus = false;
-                  } else if (index == 3) {
-                    isStatus = true;
+    return CustomSafeArea(
+      child: Scaffold(
+        key: _scaffoldKey,
+        drawer: AppDrawerWidget(userId: userId),
+        resizeToAvoidBottomInset: false,
+        body: _pages[currentIndex],
+        bottomNavigationBar: SafeArea(
+          bottom: true,
+          top: false,
+          left: false,
+          right: false,
+          child: SizedBox(
+            height: 37,
+            child: MediaQuery.removePadding(
+              context: context,
+              removeBottom: true,
+              child: BottomNavigationBar(
+                type: BottomNavigationBarType.fixed,
+                currentIndex: currentIndex,
+                onTap: (index) {
+                  if (kDebugMode) print('Selected index: $index');
+                  if (index == 4) {
+                    _scaffoldKey.currentState?.openDrawer();
+                    return;
                   }
-                });
-              },
-              selectedItemColor:
-                  isStatus ? Colors.redAccent : Colors.black,
-              unselectedItemColor: Colors.grey,
-              showUnselectedLabels: true,
-              showSelectedLabels: true,
-              selectedLabelStyle: const TextStyle(
-                fontSize: 8,
-                fontWeight: FontWeight.w600,
+
+                  setState(() {
+                    showLoginPrompt = false; // Reset login prompt
+                    if (index == 2 && !isStatus) {
+                      // Check userId only when "Sell" is tapped
+                      if (userId == null || userId!.isEmpty || userId == 'Unknown') {
+                        showLoginPrompt = true;
+                      }
+                    }
+                    currentIndex = index;
+                    if (index == 0) {
+                      isStatus = false;
+                    } else if (index == 3) {
+                      isStatus = true;
+                    }
+                  });
+                },
+                selectedItemColor: isStatus ? Colors.redAccent : Colors.black,
+                unselectedItemColor: Colors.grey,
+                showUnselectedLabels: true,
+                showSelectedLabels: true,
+                selectedLabelStyle: const TextStyle(
+                  fontSize: 8,
+                  fontWeight: FontWeight.w600,
+                ),
+                unselectedLabelStyle: const TextStyle(fontSize: 8),
+                selectedFontSize: 8,
+                unselectedFontSize: 8,
+                iconSize: 14,
+                items: [
+                  const BottomNavigationBarItem(
+                    icon: Icon(Icons.home),
+                    label: 'Home',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(
+                      isStatus ? Icons.shopping_cart : Icons.support_agent,
+                    ),
+                    label: isStatus ? 'Buying' : 'Support',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: isStatus
+                        ? const Icon(Icons.sell)
+                        : Container(
+                            padding: const EdgeInsets.all(1),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.black, width: 2),
+                            ),
+                            child: const Icon(
+                              Icons.add,
+                              size: 12,
+                              color: Color.fromARGB(255, 12, 9, 233),
+                            ),
+                          ),
+                    label: isStatus ? 'Selling' : 'Sell',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(
+                      isStatus ? Icons.star_border_outlined : Icons.stream_outlined,
+                    ),
+                    label: isStatus ? 'Shortlist' : 'Status',
+                  ),
+                  const BottomNavigationBarItem(
+                    icon: Icon(Icons.more_vert),
+                    label: 'More',
+                  ),
+                ],
               ),
-              unselectedLabelStyle: const TextStyle(fontSize: 8),
-              selectedFontSize: 8,
-              unselectedFontSize: 8,
-              iconSize: 14,
-              items: [
-                const BottomNavigationBarItem(
-                  icon: Icon(Icons.home),
-                  label: 'Home',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(
-                    isStatus ? Icons.shopping_cart : Icons.support_agent,
-                  ),
-                  label: isStatus ? 'Buying' : 'Support',
-                ),
-                BottomNavigationBarItem(
-                  icon: isStatus
-                      ? const Icon(Icons.sell)
-                      : Container(
-                          padding: const EdgeInsets.all(1),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border:
-                                Border.all(color: Colors.black, width: 2),
-                          ),
-                          child: const Icon(
-                            Icons.add,
-                            size: 12,
-                            color: Color.fromARGB(255, 12, 9, 233),
-                          ),
-                        ),
-                  label: isStatus ? 'Selling' : 'Sell',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(
-                    isStatus
-                        ? Icons.star_border_outlined
-                        : Icons.stream_outlined,
-                  ),
-                  label: isStatus ? 'Shortlist' : 'Status',
-                ),
-                const BottomNavigationBarItem(
-                  icon: Icon(Icons.more_vert),
-                  label: 'More',
-                ),
-              ],
             ),
           ),
         ),
