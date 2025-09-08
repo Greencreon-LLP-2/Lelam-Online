@@ -125,7 +125,6 @@ class _MyBidsWidgetState extends State<MyBidsWidget> {
       _userId = widget.userId ?? prefs.getString('userId') ?? 'Unknown';
     });
     debugPrint('MyBidsWidget - Loaded userId: $_userId');
-    // Fetch districts
     districts = await AttributeValueService.fetchDistricts();
     debugPrint('Loaded districts: ${districts.map((d) => d['name']).toList()}');
     await _loadBids();
@@ -175,7 +174,6 @@ class _MyBidsWidgetState extends State<MyBidsWidget> {
               }
             }
 
-            // Map parent_zone_id to district name
             String location = 'Unknown Location';
             final parentZoneId = postData['parent_zone_id']?.toString();
             if (parentZoneId != null) {
@@ -392,7 +390,160 @@ class _MyBidsWidgetState extends State<MyBidsWidget> {
       });
     }
   }
+Future<void> _increaseBid(String postId, String bidId, double currentBid) async {
+  try {
+    final newBidAmount = currentBid + 100; // Example: Increase by 100 (adjust as needed)
+    final response = await http.get(
+      Uri.parse(
+        '${widget.baseUrl}/increase-bid.php?token=${widget.token}&user_id=$_userId&post_id=$postId&bidamt=$newBidAmount',
+      ),
+      headers: {
+        'token': widget.token,
+        'Cookie': 'PHPSESSID=sgju9bt1ljebrc8sbca4bcn64a',
+      },
+    );
 
+    debugPrint('increase-bid.php response: ${response.body}');
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['status'] == 'true') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['data'] ?? 'Bid increased successfully')),
+        );
+        await _loadBids(); // Refresh bids
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['data'] ?? 'Failed to increase bid')),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to increase bid')),
+      );
+    }
+  } catch (e) {
+    debugPrint('Error increasing bid: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Error increasing bid')),
+    );
+  }
+}
+
+Future<void> _proceedWithBid(String postId, String bidId) async {
+  try {
+    final meetingTime = DateFormat('HH:mm:ss').format(DateTime.now()); // Current time as example
+    final response = await http.get(
+      Uri.parse(
+        '${widget.baseUrl}/procced-meeting-with-bid.php?token=${widget.token}&user_id=$_userId&post_id=$postId&customerbid_id=$bidId&meeting_times=$meetingTime',
+      ),
+      headers: {
+        'token': widget.token,
+        'Cookie': 'PHPSESSID=sgju9bt1ljebrc8sbca4bcn64a',
+      },
+    );
+
+    debugPrint('procced-meeting-with-bid.php response: ${response.body}');
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['status'] == 'true') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['data'] ?? 'Meeting request sent')),
+        );
+        await _loadBids(); // Refresh bids
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['data'] ?? 'Failed to proceed with bid')),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to proceed with bid')),
+      );
+    }
+  } catch (e) {
+    debugPrint('Error proceeding with bid: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Error proceeding with bid')),
+    );
+  }
+}
+
+Future<void> _proceedWithoutBid(String postId) async {
+  try {
+    final meetingDate = DateFormat('yyyy-MM-dd').format(DateTime.now()); // Current date as example
+    final response = await http.get(
+      Uri.parse(
+        '${widget.baseUrl}/procced-meeting-without-bid.php?token=${widget.token}&user_id=$_userId&post_id=$postId&meeting_date=$meetingDate',
+      ),
+      headers: {
+        'token': widget.token,
+        'Cookie': 'PHPSESSID=sgju9bt1ljebrc8sbca4bcn64a',
+      },
+    );
+
+    debugPrint('procced-meeting-without-bid.php response: ${response.body}');
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['status'] == 'true') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['data'] ?? 'Meeting request sent')),
+        );
+        await _loadBids(); // Refresh bids
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['data'] ?? 'Failed to proceed without bid')),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to proceed without bid')),
+      );
+    }
+  } catch (e) {
+    debugPrint('Error proceeding without bid: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Error proceeding without bid')),
+    );
+  }
+}
+
+Future<void> _cancelBid(String postId, String bidId) async {
+  try {
+    final response = await http.get(
+      Uri.parse(
+        '${widget.baseUrl}/cancel-bid.php?token=${widget.token}&user_id=$_userId&post_id=$postId&customerbid_id=$bidId',
+      ),
+      headers: {
+        'token': widget.token,
+        'Cookie': 'PHPSESSID=sgju9bt1ljebrc8sbca4bcn64a',
+      },
+    );
+
+    debugPrint('cancel-bid.php response: ${response.body}');
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['status'] == 'true') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['data'] ?? 'Bid canceled successfully')),
+        );
+        await _loadBids(); // Refresh bids
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['data'] ?? 'Failed to cancel bid')),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to cancel bid')),
+      );
+    }
+  } catch (e) {
+    debugPrint('Error canceling bid: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Error canceling bid')),
+    );
+  }
+}
   List<Map<String, dynamic>> _getFilteredBids() {
     return bids.where((bid) {
       final double bidPrice = double.tryParse(bid['bidPrice'] ?? '0') ?? 0;
@@ -719,63 +870,100 @@ class BidCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    PopupMenuButton<String>(
-                      icon: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(Icons.more_vert, size: 16),
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      itemBuilder: (BuildContext context) => [
-                        const PopupMenuItem<String>(
-                          value: 'increase_bid',
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.trending_up,
-                                size: 16,
-                                color: AppTheme.primaryColor,
-                              ),
-                              SizedBox(width: 8),
-                              Text('Increase Bid'),
-                            ],
-                          ),
-                        ),
-                        const PopupMenuItem<String>(
-                          value: 'proceed_with_bid',
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.schedule,
-                                size: 16,
-                                color: Colors.blue,
-                              ),
-                              SizedBox(width: 8),
-                              Text('Meeting with Bid'),
-                            ],
-                          ),
-                        ),
-                        const PopupMenuItem<String>(
-                          value: 'proceed_without_bid',
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.event,
-                                size: 16,
-                                color: Colors.orange,
-                              ),
-                              SizedBox(width: 8),
-                              Text('Meeting without Bid'),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                  PopupMenuButton<String>(
+  icon: Container(
+    padding: const EdgeInsets.all(8),
+    decoration: BoxDecoration(
+      color: Colors.grey[100],
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: const Icon(Icons.more_vert, size: 16),
+  ),
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(12),
+  ),
+  onSelected: (value) async {
+    if (value == 'increase_bid') {
+      await context.findAncestorStateOfType<_MyBidsWidgetState>()?._increaseBid(
+        bid['post_id'],
+        bid['id'],
+        double.tryParse(bid['bidPrice'] ?? '0') ?? 0,
+      );
+    } else if (value == 'proceed_with_bid') {
+      await context.findAncestorStateOfType<_MyBidsWidgetState>()?._proceedWithBid(
+        bid['post_id'],
+        bid['id'],
+      );
+    } else if (value == 'proceed_without_bid') {
+      await context.findAncestorStateOfType<_MyBidsWidgetState>()?._proceedWithoutBid(
+        bid['post_id'],
+      );
+    } else if (value == 'cancel_bid') {
+      await context.findAncestorStateOfType<_MyBidsWidgetState>()?._cancelBid(
+        bid['post_id'],
+        bid['id'],
+      );
+    }
+  },
+  itemBuilder: (BuildContext context) => [
+    const PopupMenuItem<String>(
+      value: 'increase_bid',
+      child: Row(
+        children: [
+          Icon(
+            Icons.trending_up,
+            size: 16,
+            color: AppTheme.primaryColor,
+          ),
+          SizedBox(width: 8),
+          Text('Increase Bid'),
+        ],
+      ),
+    ),
+    const PopupMenuItem<String>(
+      value: 'proceed_with_bid',
+      child: Row(
+        children: [
+          Icon(
+            Icons.schedule,
+            size: 16,
+            color: Colors.blue,
+          ),
+          SizedBox(width: 8),
+          Text('Meeting with Bid'),
+        ],
+      ),
+    ),
+    const PopupMenuItem<String>(
+      value: 'proceed_without_bid',
+      child: Row(
+        children: [
+          Icon(
+            Icons.event,
+            size: 16,
+            color: Colors.orange,
+          ),
+          SizedBox(width: 8),
+          Text('Meeting without Bid'),
+        ],
+      ),
+    ),
+    const PopupMenuItem<String>(
+      value: 'cancel_bid',
+      child: Row(
+        children: [
+          Icon(
+            Icons.cancel,
+            size: 16,
+            color: Colors.red,
+          ),
+          SizedBox(width: 8),
+          Text('Cancel Bid'),
+        ],
+      ),
+    ),
+  ],
+),
                   ],
                 ),
                 const SizedBox(height: 16),

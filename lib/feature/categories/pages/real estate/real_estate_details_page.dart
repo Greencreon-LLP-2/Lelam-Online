@@ -7,7 +7,8 @@ import 'package:lelamonline_flutter/core/api/api_constant.dart';
 import 'package:lelamonline_flutter/core/theme/app_theme.dart';
 import 'package:lelamonline_flutter/feature/categories/models/details_model.dart';
 import 'package:lelamonline_flutter/feature/categories/pages/real%20estate/real_estate_categories.dart';
-import 'package:lelamonline_flutter/feature/categories/seller%20info/seller_info_page.dart' hide baseUrl, token;
+import 'package:lelamonline_flutter/feature/categories/seller%20info/seller_info_page.dart'
+    hide baseUrl, token;
 import 'package:lelamonline_flutter/feature/categories/services/attribute_valuePair_service.dart';
 import 'package:lelamonline_flutter/feature/categories/services/details_service.dart';
 import 'package:lelamonline_flutter/feature/categories/widgets/bid_dialog.dart';
@@ -96,9 +97,7 @@ class _RealEstateProductDetailsPageState
 
     try {
       final response = await http.get(
-        Uri.parse(
-          '$baseUrl/list-shortlist.php?token=$token&user_id=$userId',
-        ),
+        Uri.parse('$baseUrl/list-shortlist.php?token=$token&user_id=$userId'),
         headers: {
           'token': token,
           'Cookie': 'PHPSESSID=a99k454ctjeu4sp52ie9dgua76',
@@ -108,7 +107,9 @@ class _RealEstateProductDetailsPageState
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         if (responseData['status'] == 'true' && responseData['data'] is List) {
-          final shortlistData = List<Map<String, dynamic>>.from(responseData['data']);
+          final shortlistData = List<Map<String, dynamic>>.from(
+            responseData['data'],
+          );
           final isShortlisted = shortlistData.any(
             (item) => item['post_id'].toString() == widget.product.id,
           );
@@ -123,7 +124,9 @@ class _RealEstateProductDetailsPageState
           });
         }
       } else {
-        throw Exception('Failed to check shortlist status: ${response.reasonPhrase}');
+        throw Exception(
+          'Failed to check shortlist status: ${response.reasonPhrase}',
+        );
       }
     } catch (e) {
       debugPrint('Error checking shortlist status: $e');
@@ -155,10 +158,7 @@ class _RealEstateProductDetailsPageState
           'Cookie': 'PHPSESSID=a99k454ctjeu4sp52ie9dgua76',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'user_id': userId,
-          'post_id': widget.product.id,
-        }),
+        body: jsonEncode({'user_id': userId, 'post_id': widget.product.id}),
       );
 
       if (response.statusCode == 200) {
@@ -171,9 +171,7 @@ class _RealEstateProductDetailsPageState
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                _isFavorited
-                    ? 'Added to shortlist'
-                    : 'Removed from shortlist',
+                _isFavorited ? 'Added to shortlist' : 'Removed from shortlist',
               ),
             ),
           );
@@ -184,8 +182,10 @@ class _RealEstateProductDetailsPageState
           if (cachedShortlist != null) {
             try {
               final responseData = jsonDecode(cachedShortlist);
-              if (responseData['status'] == 'true' && responseData['data'] is List) {
-                List<Map<String, dynamic>> shortlistData = List<Map<String, dynamic>>.from(responseData['data']);
+              if (responseData['status'] == 'true' &&
+                  responseData['data'] is List) {
+                List<Map<String, dynamic>> shortlistData =
+                    List<Map<String, dynamic>>.from(responseData['data']);
                 if (_isFavorited) {
                   shortlistData.add({
                     'post_id': widget.product.id,
@@ -193,14 +193,13 @@ class _RealEstateProductDetailsPageState
                     'created_on': DateTime.now().toIso8601String(),
                   });
                 } else {
-                  shortlistData.removeWhere((item) => item['post_id'].toString() == widget.product.id);
+                  shortlistData.removeWhere(
+                    (item) => item['post_id'].toString() == widget.product.id,
+                  );
                 }
                 await prefs.setString(
                   'shortlist_$userId',
-                  jsonEncode({
-                    'status': 'true',
-                    'data': shortlistData,
-                  }),
+                  jsonEncode({'status': 'true', 'data': shortlistData}),
                 );
               }
             } catch (e) {
@@ -208,7 +207,9 @@ class _RealEstateProductDetailsPageState
             }
           }
         } else {
-          throw Exception('Failed to update shortlist: ${responseData['data']}');
+          throw Exception(
+            'Failed to update shortlist: ${responseData['data']}',
+          );
         }
       } else {
         throw Exception('Failed to update shortlist: ${response.reasonPhrase}');
@@ -218,9 +219,9 @@ class _RealEstateProductDetailsPageState
       setState(() {
         _isLoadingFavorite = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
@@ -338,14 +339,15 @@ class _RealEstateProductDetailsPageState
         // Check if the filter value is an ID that needs mapping
         final variation = attributeVariations.firstWhere(
           (variation) => variation.id == filterValue,
-          orElse: () => AttributeVariation(
-            id: '',
-            name: filterValue,
-            attributeId: '',
-            status: '',
-            createdOn: '',
-            updatedOn: '',
-          ),
+          orElse:
+              () => AttributeVariation(
+                id: '',
+                name: filterValue,
+                attributeId: '',
+                status: '',
+                createdOn: '',
+                updatedOn: '',
+              ),
         );
         final value = variation.name.isNotEmpty ? variation.name : filterValue;
         attributeValues[attribute.name] = value;
@@ -379,21 +381,22 @@ class _RealEstateProductDetailsPageState
     if (zoneId == 'all') return 'All Kerala';
     final location = _locations.firstWhere(
       (loc) => loc.id == zoneId,
-      orElse: () => LocationData(
-        id: '',
-        slug: '',
-        parentId: '',
-        name: zoneId,
-        image: '',
-        description: '',
-        latitude: '',
-        longitude: '',
-        popular: '',
-        status: '',
-        allStoreOnOff: '',
-        createdOn: '',
-        updatedOn: '',
-      ),
+      orElse:
+          () => LocationData(
+            id: '',
+            slug: '',
+            parentId: '',
+            name: zoneId,
+            image: '',
+            description: '',
+            latitude: '',
+            longitude: '',
+            popular: '',
+            status: '',
+            allStoreOnOff: '',
+            createdOn: '',
+            updatedOn: '',
+          ),
     );
     return location.name;
   }
@@ -464,19 +467,21 @@ class _RealEstateProductDetailsPageState
                               child: CachedNetworkImage(
                                 imageUrl: _images[index],
                                 fit: BoxFit.contain,
-                                placeholder: (context, url) => const Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                                errorWidget: (context, url, error) => Container(
-                                  color: Colors.grey[200],
-                                  child: const Center(
-                                    child: Icon(
-                                      Icons.error_outline,
-                                      size: 50,
-                                      color: Colors.red,
+                                placeholder:
+                                    (context, url) => const Center(
+                                      child: CircularProgressIndicator(),
                                     ),
-                                  ),
-                                ),
+                                errorWidget:
+                                    (context, url, error) => Container(
+                                      color: Colors.grey[200],
+                                      child: const Center(
+                                        child: Icon(
+                                          Icons.error_outline,
+                                          size: 50,
+                                          color: Colors.red,
+                                        ),
+                                      ),
+                                    ),
                               ),
                             ),
                           ),
@@ -503,7 +508,8 @@ class _RealEstateProductDetailsPageState
                                       Icons.close,
                                       color: Colors.white,
                                     ),
-                                    onPressed: () => Navigator.of(context).pop(),
+                                    onPressed:
+                                        () => Navigator.of(context).pop(),
                                   ),
                                 ),
                                 const Spacer(),
@@ -543,7 +549,9 @@ class _RealEstateProductDetailsPageState
                                   onTap: () {
                                     fullScreenController.animateToPage(
                                       index,
-                                      duration: const Duration(milliseconds: 300),
+                                      duration: const Duration(
+                                        milliseconds: 300,
+                                      ),
                                       curve: Curves.easeInOut,
                                     );
                                   },
@@ -552,9 +560,10 @@ class _RealEstateProductDetailsPageState
                                     margin: const EdgeInsets.only(right: 8),
                                     decoration: BoxDecoration(
                                       border: Border.all(
-                                        color: _currentImageIndex == index
-                                            ? Colors.blue
-                                            : Colors.transparent,
+                                        color:
+                                            _currentImageIndex == index
+                                                ? Colors.blue
+                                                : Colors.transparent,
                                         width: 2,
                                       ),
                                       borderRadius: BorderRadius.circular(8),
@@ -565,18 +574,19 @@ class _RealEstateProductDetailsPageState
                                       child: CachedNetworkImage(
                                         imageUrl: _images[index],
                                         fit: BoxFit.cover,
-                                        placeholder: (context, url) =>
-                                            const Center(
+                                        placeholder:
+                                            (context, url) => const Center(
                                               child: SizedBox(
                                                 width: 20,
                                                 height: 20,
-                                                child: CircularProgressIndicator(
-                                                  strokeWidth: 2,
-                                                ),
+                                                child:
+                                                    CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                    ),
                                               ),
                                             ),
-                                        errorWidget: (context, url, error) =>
-                                            const Icon(
+                                        errorWidget:
+                                            (context, url, error) => const Icon(
                                               Icons.error,
                                               size: 20,
                                             ),
@@ -747,61 +757,62 @@ class _RealEstateProductDetailsPageState
     return isLoadingSeller
         ? const Center(child: CircularProgressIndicator())
         : sellerErrorMessage.isNotEmpty
-            ? Center(
-                child: Text(
-                  sellerErrorMessage,
-                  style: const TextStyle(color: Colors.red),
-                ),
-              )
-            : GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          SellerInformationPage(userId: widget.product.createdBy),
-                    ),
-                  );
-                },
-                child: Row(
+        ? Center(
+          child: Text(
+            sellerErrorMessage,
+            style: const TextStyle(color: Colors.red),
+          ),
+        )
+        : GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder:
+                    (context) =>
+                        SellerInformationPage(userId: widget.product.createdBy),
+              ),
+            );
+          },
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundImage:
+                    sellerProfileImage != null && sellerProfileImage!.isNotEmpty
+                        ? CachedNetworkImageProvider(sellerProfileImage!)
+                        : const AssetImage('assets/images/avatar.gif')
+                            as ImageProvider,
+                radius: 30,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CircleAvatar(
-                      backgroundImage:
-                          sellerProfileImage != null && sellerProfileImage!.isNotEmpty
-                              ? CachedNetworkImageProvider(sellerProfileImage!)
-                              : const AssetImage('assets/images/avatar.gif')
-                                  as ImageProvider,
-                      radius: 30,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            sellerName,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Member Since $sellerActiveFrom',
-                            style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Posts: $sellerNoOfPosts',
-                            style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-                          ),
-                        ],
+                    Text(
+                      sellerName,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Member Since $sellerActiveFrom',
+                      style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Posts: $sellerNoOfPosts',
+                      style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                    ),
                   ],
                 ),
-              );
+              ),
+              const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+            ],
+          ),
+        );
   }
 
   Widget _buildQuestionsSection() {
@@ -871,11 +882,13 @@ class _RealEstateProductDetailsPageState
                                   width: double.infinity,
                                   height: 400,
                                   fit: BoxFit.cover,
-                                  placeholder: (context, url) => const Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                  errorWidget: (context, url, error) =>
-                                      const Icon(Icons.error),
+                                  placeholder:
+                                      (context, url) => const Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                  errorWidget:
+                                      (context, url, error) =>
+                                          const Icon(Icons.error),
                                 ),
                               );
                             },
@@ -941,22 +954,25 @@ class _RealEstateProductDetailsPageState
                           const Spacer(),
                           _isLoadingFavorite
                               ? const SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
                                   ),
-                                )
-                              : IconButton(
-                                  icon: Icon(
-                                    _isFavorited
-                                        ? Icons.favorite
-                                        : Icons.favorite_border,
-                                    color: _isFavorited ? Colors.red : Colors.white,
-                                  ),
-                                  onPressed: _toggleShortlist,
                                 ),
+                              )
+                              : IconButton(
+                                icon: Icon(
+                                  _isFavorited
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color:
+                                      _isFavorited ? Colors.red : Colors.white,
+                                ),
+                                onPressed: _toggleShortlist,
+                              ),
                           IconButton(
                             icon: const Icon(Icons.share, color: Colors.white),
                             onPressed: () {
@@ -991,16 +1007,16 @@ class _RealEstateProductDetailsPageState
                           const SizedBox(width: 4),
                           _isLoadingLocations
                               ? const SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : Text(
-                                  landMark,
-                                  style: const TextStyle(color: Colors.grey),
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
                                 ),
+                              )
+                              : Text(
+                                landMark,
+                                style: const TextStyle(color: Colors.grey),
+                              ),
                           const Spacer(),
                           const Icon(
                             Icons.access_time,
@@ -1045,7 +1061,7 @@ class _RealEstateProductDetailsPageState
                           ),
                           ElevatedButton.icon(
                             onPressed: () {
-                              // Call functionality
+                             
                             },
                             icon: const Icon(Icons.call),
                             label: const Text('Call Support'),
@@ -1151,20 +1167,21 @@ class _RealEstateProductDetailsPageState
                         const Center(child: CircularProgressIndicator())
                       else
                         Column(
-                          children: orderedAttributeValues
-                              .where(
-                                (entry) =>
-                                    entry.key != 'Seller Type' &&
-                                    entry.key != 'Auction Starting Price' &&
-                                    entry.key != 'Auction Attempts',
-                              )
-                              .map(
-                                (entry) => _buildSellerCommentItem(
-                                  entry.key,
-                                  entry.value,
-                                ),
-                              )
-                              .toList(),
+                          children:
+                              orderedAttributeValues
+                                  .where(
+                                    (entry) =>
+                                        entry.key != 'Seller Type' &&
+                                        entry.key != 'Auction Starting Price' &&
+                                        entry.key != 'Auction Attempts',
+                                  )
+                                  .map(
+                                    (entry) => _buildSellerCommentItem(
+                                      entry.key,
+                                      entry.value,
+                                    ),
+                                  )
+                                  .toList(),
                         ),
                     ],
                   ),
@@ -1229,55 +1246,59 @@ class _RealEstateProductDetailsPageState
               ],
             ),
           ),
+   
           Positioned(
             left: 0,
             right: 0,
-            bottom: -5,
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: const BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 15,
-                    spreadRadius: 0,
-                    offset: Offset(1, 3),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        showBidDialog(context); // Call the dialog function
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Palette.primarypink,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 0),
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
-                      ),
-                      child: const Text('Place Bid'),
+            bottom: 0,
+            child: SafeArea(
+              top: false,
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: const BoxDecoration(
+                  
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 15,
+                      spreadRadius: 0,
+                      offset: Offset(1, 3),
                     ),
-                  ),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => _showMeetingDialog(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Palette.primaryblue,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 0),
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => showBidDialog(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Palette.primarypink,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 5),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.zero,
+                          ),
                         ),
+                        child: const Text('Place Bid'),
                       ),
-                      child: const Text('Fix Meeting'),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => _showMeetingDialog(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Palette.primaryblue,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 5),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.zero,
+                          ),
+                        ),
+                        child: const Text('Fix Meeting'),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

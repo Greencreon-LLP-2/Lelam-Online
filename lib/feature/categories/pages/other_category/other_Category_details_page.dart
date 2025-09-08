@@ -596,360 +596,359 @@ String sellerName = 'Unknown';
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-   // final filters = _parseFilters(widget.bike.filters);
+ @override
+Widget build(BuildContext context) {
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 80),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Stack(
-                  children: [
-                    SizedBox(
-                      height: 400,
-                      child: Stack(
-                        children: [
-                          PageView.builder(
-                            controller: _pageController,
-                            itemCount: _images.length,
-                            onPageChanged: (index) {
-                              setState(() {
-                                _currentImageIndex = index;
-                              });
-                            },
-                            itemBuilder: (context, index) {
-                              return GestureDetector(
-                                onTap: () => _showFullScreenGallery(context),
-                                child: CachedNetworkImage(
-                                  imageUrl: _images[index],
-                                  width: double.infinity,
-                                  height: 400,
-                                  fit: BoxFit.contain,
-                                  placeholder: (context, url) => const Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                  errorWidget: (context, url, error) =>
-                                      const Icon(Icons.error),
+  return Scaffold(
+    backgroundColor: Colors.white,
+    body: Stack(
+      children: [
+        SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: 80),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Stack(
+                children: [
+                  SizedBox(
+                    height: 400,
+                    child: Stack(
+                      children: [
+                        PageView.builder(
+                          controller: _pageController,
+                          itemCount: _images.length,
+                          onPageChanged: (index) {
+                            setState(() {
+                              _currentImageIndex = index;
+                            });
+                          },
+                          itemBuilder: (context, index) {
+                            return GestureDetector(
+                              onTap: () => _showFullScreenGallery(context),
+                              child: CachedNetworkImage(
+                                imageUrl: _images[index],
+                                width: double.infinity,
+                                height: 400,
+                                fit: BoxFit.contain,
+                                placeholder: (context, url) => const Center(
+                                  child: CircularProgressIndicator(),
                                 ),
-                              );
-                            },
+                                errorWidget: (context, url, error) =>
+                                    const Icon(Icons.error),
+                              ),
+                            );
+                          },
+                        ),
+                        Positioned(
+                          right: 16,
+                          bottom: 16,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.7),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              '${_currentImageIndex + 1}/${_images.length}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
+                        ),
+                        if (isFeatured)
                           Positioned(
-                            right: 16,
-                            bottom: 16,
+                            top: 8,
+                            left: 8,
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
+                                horizontal: 8,
+                                vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.7),
-                                borderRadius: BorderRadius.circular(20),
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.white),
                               ),
-                              child: Text(
-                                '${_currentImageIndex + 1}/${_images.length}',
-                                style: const TextStyle(
+                              child: const Text(
+                                'FEATURED',
+                                style: TextStyle(
+                                  fontSize: 10,
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
                           ),
-                          if (isFeatured)
-                            Positioned(
-                              top: 8,
-                              left: 8,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.red,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: Colors.white),
-                                ),
-                                child: const Text(
-                                  'FEATURED',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
+                      ],
+                    ),
+                  ),
+                  SafeArea(
+                    child: Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          icon: Icon(
+                            _isFavorited
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: _isFavorited ? Colors.red : Colors.white,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isFavorited = !_isFavorited;
+                            });
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.share, color: Colors.white),
+                          onPressed: () {
+                  
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SafeArea(
-                      child: Row(
-                        children: [
-                          IconButton(
-                            onPressed: () => Navigator.pop(context),
-                            icon: const Icon(
-                              Icons.arrow_back,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const Spacer(),
-                          IconButton(
-                            icon: Icon(
-                              _isFavorited
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: _isFavorited ? Colors.red : Colors.white,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _isFavorited = !_isFavorited;
-                              });
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.share, color: Colors.white),
-                            onPressed: () {
-                              // Share functionality
-                            },
-                          ),
-                        ],
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.location_on,
+                          size: 16,
+                          color: Colors.grey,
+                        ),
+                        const SizedBox(width: 4),
+                        _isLoadingLocations
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                landMark,
+                                style: const TextStyle(color: Colors.grey),
+                              ),
+                        const Spacer(),
+                        const Icon(
+                          Icons.access_time,
+                          size: 16,
+                          color: Colors.grey,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          createdOn,
+                          style: const TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      '₹${formatPriceInt(double.tryParse(price) ?? 0)}',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blueAccent,
                       ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '#AD ID $id',
+                          style: const TextStyle(color: Colors.grey),
+                        ),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            // Call functionality
+                          },
+                          icon: const Icon(Icons.call),
+                          label: const Text('Call Support'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.zero,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (isFinanceAvailable)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.account_balance,
+                              size: 16,
+                              color: Colors.grey[700],
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Finance Available',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[700],
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const Divider(),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.30),
+                      blurRadius: 10,
+                      spreadRadius: 1,
+                      offset: const Offset(1, 1),
                     ),
                   ],
                 ),
-                Padding(
+                child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 24,
+                      const Text(
+                        'Details',
+                        style: TextStyle(
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Row(
+                      const SizedBox(height: 12),
+                      Column(
                         children: [
-                          const Icon(
-                            Icons.location_on,
-                            size: 16,
-                            color: Colors.grey,
+                          _buildDetailItem(
+                            Icons.person,
+                            widget.bike.byDealer == '1' ? 'Dealer' : 'Owner',
                           ),
-                          const SizedBox(width: 4),
-                          _isLoadingLocations
-                              ? const SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : Text(
-                                  landMark,
-                                  style: const TextStyle(color: Colors.grey),
-                                ),
-                          const Spacer(),
-                          const Icon(
-                            Icons.access_time,
-                            size: 16,
-                            color: Colors.grey,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            createdOn,
-                            style: const TextStyle(color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        '₹${formatPriceInt(double.tryParse(price) ?? 0)}',
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blueAccent,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            '#AD ID $id',
-                            style: const TextStyle(color: Colors.grey),
-                          ),
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              // Call functionality
-                            },
-                            icon: const Icon(Icons.call),
-                            label: const Text('Call Support'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.zero,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (isFinanceAvailable)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.account_balance,
-                                size: 16,
-                                color: Colors.grey[700],
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Finance Available',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[700],
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                const Divider(),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.30),
-                        blurRadius: 10,
-                        spreadRadius: 1,
-                        offset: const Offset(1, 1),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Details',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Column(
-                          children: [
+                          if (widget.bike.brand.isNotEmpty)
                             _buildDetailItem(
-                              Icons.person,
-                              widget.bike.byDealer == '1' ? 'Dealer' : 'Owner',
+                              Icons.branding_watermark,
+                              'Brand: ${widget.bike.brand}',
                             ),
-                            if (widget.bike.brand.isNotEmpty)
-                              _buildDetailItem(
-                                Icons.branding_watermark,
-                                'Brand: ${widget.bike.brand}',
-                              ),
-                            if (widget.bike.model.isNotEmpty)
-                              _buildDetailItem(
-                                Icons.directions_bike,
-                                'Model: ${widget.bike.model}',
-                              ),
+                          if (widget.bike.model.isNotEmpty)
+                            _buildDetailItem(
+                              Icons.directions_bike,
+                              'Model: ${widget.bike.model}',
+                            ),
                             // if (filters.isNotEmpty)
                             //   ...filters.entries.map((entry) => _buildDetailItem(
                             //         Icons.info,
                             //         '${entry.key}: ${entry.value}',
                             //       )),
-                          ],
-                        ),
-                      ],
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const Divider(),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Description',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 12),
+                    Text(
+                      widget.bike.description.isNotEmpty
+                          ? widget.bike.description
+                          : 'No description available',
+                      style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                    ),
+                  ],
                 ),
-                const Divider(),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Description',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+              ),
+              const Divider(),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Seller Information',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(height: 12),
-                      Text(
-                        widget.bike.description.isNotEmpty
-                            ? widget.bike.description
-                            : 'No description available',
-                        style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-                      ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildSellerInformationItem(context),
+                  ],
                 ),
-                const Divider(),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Seller Information',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+              ),
+              const Divider(),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Questions',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(height: 12),
-                      _buildSellerInformationItem(
-                       
-                        context,
-                      ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildQuestionsSection(),
+                  ],
                 ),
-                const Divider(),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Questions',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      _buildQuestionsSection(),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: -5,
+        ),
+       
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: SafeArea(
+            top: false,
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: const BoxDecoration(
@@ -964,29 +963,28 @@ String sellerName = 'Unknown';
               ),
               child: Row(
                 children: [
-                            Expanded(
-  child: ElevatedButton(
-    onPressed: () {
-      showBidDialog(context); // Call the dialog function
-    },
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Palette.primarypink,
-      foregroundColor: Colors.white,
-      padding: const EdgeInsets.symmetric(vertical: 0),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-    ),
-    child: const Text('Place Bid'),
-  ),
-),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => showBidDialog(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Palette.primarypink,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 5),
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.zero,
+                        ),
+                      ),
+                      child: const Text('Place Bid'),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () => _showMeetingDialog(context),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Palette.primaryblue,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 0),
+                        padding: const EdgeInsets.symmetric(vertical: 5),
                         shape: const RoundedRectangleBorder(
                           borderRadius: BorderRadius.zero,
                         ),
@@ -998,8 +996,9 @@ String sellerName = 'Unknown';
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 }
